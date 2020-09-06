@@ -29,10 +29,17 @@ data1 and data2 are dicts that look like
 { zip : { some info about the zip }}
 '''
 def mergeData(data1, data2):
+    for key in data2:
+        if key in data1:
+            data1[key].update(data2[key])
+        else:
+            data1.update({ key : data2[key]})   # merge unfound keypairs in data2 into data1
+    return data1
 
 
 def main():
     zipCodesToKeep = [94601, 94602]
+    
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
     url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
 
@@ -45,5 +52,7 @@ def main():
     
     print(filteredData1)
     print(filteredData2)
+    merged = mergeData(filteredData1, filteredData2)
+    print(merged)
 
 main()
