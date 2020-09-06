@@ -53,7 +53,7 @@ def main():
     zipCodesToKeep = [94601, 94602, 94606, 94610, 94619]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
-    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
+    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
 
     '''
     data1 = pullData(url1)
@@ -69,15 +69,22 @@ def main():
     print(merged)
     '''
     # for testing, statically load the merged dataset so we are not constantly calling the API
-    merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'PercentagePositiveTests': 3.97580916116}}
-    print(merged)
+    merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'Positives': 715, 'NumberOfTests': 11987, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'Positives': 172, 'NumberOfTests': 10875, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'Positives': 413, 'NumberOfTests': 7097, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'Positives': 2396, 'NumberOfTests': 15880, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'Positives': 355, 'NumberOfTests': 8929, 'PercentagePositiveTests': 3.97580916116}}
+
 
     total_cases = aggregate(merged,"Cases")
     total_population = aggregate(merged, "Population")
     case_rate = total_cases / total_population * 100000
 
+    total_positives = aggregate(merged, "Positives")
+    total_tests = aggregate(merged, "NumberOfTests")
+    positive_rate = total_positives / total_tests * 100
+    print("Aggregated results for zip codes:",zipCodesToKeep)
     print("Total Cases:", format(total_cases, ',d'))
     print("Total Population:", format(total_population, ',d'))
     print("Case Rate per 100,000:", format(case_rate, ',.1f'))  # format to 1 decimal place
+
+    print("")
+    print("Positive Test Rate: {0:.1f}%".format(positive_rate))
 
 main()
