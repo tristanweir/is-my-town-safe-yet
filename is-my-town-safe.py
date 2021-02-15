@@ -1,7 +1,7 @@
 import urllib.request, json
 
 
-def pullData(address):
+def pull_data(address):
     #print("Collecting data...")
     with urllib.request.urlopen(address) as url:
         data = json.loads(url.read().decode())
@@ -12,17 +12,17 @@ def pullData(address):
 Takes ArcGis data and a list of zip codes
 Returns a dict containing only the data for those zips in the list of zip code (zip is the key)
 '''
-def filterData(data, zipCodesToKeep):
+def filter_data(data, zipCodesToKeep):
 
-    filteredData = dict()
+    filtered_data = dict()
 
     for entry in data:
         for zip in zipCodesToKeep:
             if "attributes" in entry and "Zip_Number" in entry["attributes"] and entry["attributes"]["Zip_Number"] == zip:
                 #print(entry["attributes"])
-                filteredData.update({ zip : entry["attributes"] })
+                filtered_data.update({ zip : entry["attributes"] })
 
-    return filteredData
+    return filtered_data
 
 '''
 data1 and data2 are dicts that look like
@@ -30,7 +30,7 @@ data1 and data2 are dicts that look like
 
 In most cases the keys are the same in each dict, but they don't have to be
 '''
-def mergeData(data1, data2):
+def merge_data(data1, data2):
     for key in data2:
         if key in data1:
             data1[key].update(data2[key])
@@ -56,16 +56,16 @@ def main():
     url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
 
     
-    data1 = pullData(url1)
-    filtered_data1 = filterData(data1["features"], zip_codes_to_keep)
+    data1 = pull_data(url1)
+    filtered_data1 = filter_data(data1["features"], zip_codes_to_keep)
     
-    data2 = pullData(url2)
-    filtered_data2 = filterData(data2["features"], zip_codes_to_keep)
+    data2 = pull_data(url2)
+    filtered_data2 = filter_data(data2["features"], zip_codes_to_keep)
     
     
     print(filtered_data1, "\n\n")
     print(filtered_data2, "\n\n")
-    merged = mergeData(filtered_data1, filtered_data2)
+    merged = merge_data(filtered_data1, filtered_data2)
     print("Live Data: ", merged)
     
     # for testing, statically load the merged dataset so we are not constantly calling the API
