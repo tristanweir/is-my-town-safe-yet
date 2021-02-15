@@ -50,27 +50,27 @@ def aggregate(data, value_to_aggregate):
 
 
 def main():
-    zipCodesToKeep = [94601, 94602, 94606, 94610, 94619]
+    zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
     url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
 
-    '''
+    
     data1 = pullData(url1)
-    filteredData1 = filterData(data1["features"], zipCodesToKeep)
+    filtered_data1 = filterData(data1["features"], zip_codes_to_keep)
     
     data2 = pullData(url2)
-    filteredData2 = filterData(data2["features"], zipCodesToKeep)
+    filtered_data2 = filterData(data2["features"], zip_codes_to_keep)
     
     
-    #print(filteredData1)
-    #print(filteredData2)
-    merged = mergeData(filteredData1, filteredData2)
-    print(merged)
-    '''
+    print(filtered_data1, "\n\n")
+    print(filtered_data2, "\n\n")
+    merged = mergeData(filtered_data1, filtered_data2)
+    print("Live Data: ", merged)
+    
     # for testing, statically load the merged dataset so we are not constantly calling the API
-    merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'PercentagePositiveTests': 3.97580916116}}
-    print(merged)
+    # merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'PercentagePositiveTests': 3.97580916116}}
+    # print("Statically loaded data: ", merged)
 
     total_cases = aggregate(merged,"Cases")
     total_population = aggregate(merged, "Population")
