@@ -52,9 +52,10 @@ def aggregate(data, value_to_aggregate):
 
 def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
+    # zip_codes_to_keep = [94602]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
-    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,PercentagePositiveTests&returnGeometry=false&outSR=4326&f=json"
+    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests&returnGeometry=false&outSR=4326&f=json"
 
     
     data1 = pull_data(url1)
@@ -77,9 +78,13 @@ def main():
     total_cases = aggregate(merged,"Cases")
     total_population = aggregate(merged, "Population")
     case_rate = total_cases / total_population * 100000
+    positives = aggregate(merged,"Positives")
+    total_tests = aggregate(merged,"NumberOfTests")
+    percentage_positive_tests = positives / total_tests
 
     print("Total Cases:", format(total_cases, ',d'))
     print("Total Population:", format(total_population, ',d'))
     print("Case Rate per 100,000:", format(case_rate, ',.1f'))  # format to 1 decimal place
+    print("Percentage of Positive Tests:", format(percentage_positive_tests, ',.1%'))
 
 main()
