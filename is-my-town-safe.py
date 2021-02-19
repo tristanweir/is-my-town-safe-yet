@@ -1,5 +1,18 @@
 import urllib.request, json
-from datetime import date
+from datetime import date, datetime
+from google.cloud import firestore
+
+
+'''
+Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
+'''
+def write_to_db(data):
+    
+    days_since_epoch = int(int(datetime.now().timestamp()) / 60 / 60 / 24)
+    data["date"] = str(date.today())
+
+    db = firestore.Client()
+    db.collection(u'is-my-town-safe').document(str(days_since_epoch)).set(data)
 
 
 def pull_data(address):
@@ -83,6 +96,8 @@ def main():
     results["positives"] = aggregate(merged,"Positives")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positives"] / results["total_tests"]
+
+    write_to_db(results)
 
     print("Total Cases:", format(results["total_cases"], ',d'))
     print("Total Population:", format(results["total_population"], ',d'))
