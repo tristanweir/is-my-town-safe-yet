@@ -75,16 +75,18 @@ def main():
     # merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'PercentagePositiveTests': 3.97580916116}}
     # print("Statically loaded data: ", merged)
 
-    total_cases = aggregate(merged,"Cases")
-    total_population = aggregate(merged, "Population")
-    case_rate = total_cases / total_population * 100000
-    positives = aggregate(merged,"Positives")
-    total_tests = aggregate(merged,"NumberOfTests")
-    percentage_positive_tests = positives / total_tests
+    results = dict()
 
-    print("Total Cases:", format(total_cases, ',d'))
-    print("Total Population:", format(total_population, ',d'))
-    print("Case Rate per 100,000:", format(case_rate, ',.1f'))  # format to 1 decimal place
-    print("Percentage of Positive Tests:", format(percentage_positive_tests, ',.1%'))
+    results["total_cases"] = aggregate(merged,"Cases")
+    results["total_population"] = aggregate(merged, "Population")
+    results["case_rate"] = results["total_cases"] / results["total_population"] * 100000
+    results["positives"] = aggregate(merged,"Positives")
+    results["total_tests"] = aggregate(merged,"NumberOfTests")
+    results["percentage_positive_tests"] = results["positives"] / results["total_tests"]
+
+    print("Total Cases:", format(results["total_cases"], ',d'))
+    print("Total Population:", format(results["total_population"], ',d'))
+    print("Case Rate per 100,000:", format(results["case_rate"], ',.1f'))  # format to 1 decimal place
+    print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
 
 main()
