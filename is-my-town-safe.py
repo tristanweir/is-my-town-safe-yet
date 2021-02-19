@@ -6,13 +6,15 @@ from google.cloud import firestore
 '''
 Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
 '''
-def write_to_db(data):
+def write_to_db(database_name, data):
     
-    days_since_epoch = int(int(datetime.now().timestamp()) / 60 / 60 / 24)
-    data["date"] = str(date.today())
+    document_name = str(days_since_epoch()) # the document name is the number of days since 1970-01-01
 
     db = firestore.Client()
-    db.collection(u'is-my-town-safe').document(str(days_since_epoch)).set(data)
+    db.collection(database_name).document(document_name).set(data)    
+
+def days_since_epoch():
+    return int(int(datetime.now().timestamp()) / 60 / 60 / 24)    # may be a better way to calculate this
 
 
 def pull_data(address):
@@ -90,18 +92,21 @@ def main():
 
     results = dict()
 
+    results["date"] = str(date.today())    # add the date to the database record
     results["total_cases"] = aggregate(merged,"Cases")
     results["total_population"] = aggregate(merged, "Population")
-    results["case_rate"] = results["total_cases"] / results["total_population"] * 100000
+    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
     results["positives"] = aggregate(merged,"Positives")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positives"] / results["total_tests"]
 
-    write_to_db(results)
+    database_name = "is-my-town-safe"
+
+    write_to_db(database_name, results)
 
     print("Total Cases:", format(results["total_cases"], ',d'))
     print("Total Population:", format(results["total_population"], ',d'))
-    print("Case Rate per 100,000:", format(results["case_rate"], ',.1f'))  # format to 1 decimal place
+    print("Case Rate per 100,000:", format(results["case_rate_per_100k"], ',.1f'))  # format to 1 decimal place
     print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
 
 main()
