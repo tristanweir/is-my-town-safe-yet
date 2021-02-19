@@ -13,12 +13,18 @@ def write_to_db(database_name, data):
     db = firestore.Client()
     db.collection(database_name).document(document_name).set(data)    
 
+'''
+Returns the number of days since 1970-01-01, using the current time and local timezone
+'''
 def days_since_epoch():
     return int(int(datetime.now().timestamp()) / 60 / 60 / 24)    # may be a better way to calculate this
 
 
+'''
+Takes a URL, which hopefully points at a JSON document
+Returns the parsed JSON that the URL returns
+'''
 def pull_data(address):
-    #print("Collecting data...")
     with urllib.request.urlopen(address) as url:
         data = json.loads(url.read().decode())
 
