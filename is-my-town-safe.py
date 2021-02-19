@@ -7,7 +7,7 @@ database_name = "is-my-town-safe"
 '''
 Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
 '''
-def write_to_db(database_name, data):
+def write_to_db(data):
     
     document_name = str(days_since_epoch()) # the document name is the number of days since 1970-01-01
 
@@ -154,7 +154,7 @@ def main():
 
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     
-    write_to_db(database_name, results)
+    write_to_db(results)
 
     print("Total Cases:", format(results["total_cases"], ',d'))
     print("Total Population:", format(results["total_population"], ',d'))
