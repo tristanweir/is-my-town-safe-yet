@@ -2,6 +2,7 @@ import urllib.request, json
 from datetime import date, datetime
 from google.cloud import firestore
 
+database_name = "is-my-town-safe"
 
 '''
 Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
@@ -12,6 +13,18 @@ def write_to_db(database_name, data):
 
     db = firestore.Client()
     db.collection(database_name).document(document_name).set(data)    
+
+'''
+TO DO: write this up
+'''
+def read_from_db(document_name, key):
+    db = firestore.Client()
+    doc = db.collection(database_name).document(str(document_name)).get()
+    if doc.exists:
+        doc_dict = doc.to_dict()
+        return doc_dict[key]
+    else:
+        return None
 
 '''
 Returns the number of days since 1970-01-01, using the current time and local timezone
@@ -73,6 +86,35 @@ def aggregate(data, value_to_aggregate):
 
     return running_total
 
+'''
+Takes an int, n, which is the number of days to calculate the average
+data, a dict
+key, a string which is the corresponding key in data to average
+Returns an average of n ints. If n ints can't be found, return the average of however many ints were found up to n
+'''
+def n_day_average(n, data, key):
+    sum = 0
+    count = 0
+    
+    todays_value = data[key]
+    sum = sum + todays_value
+    count = count + 1
+
+    todays_date = days_since_epoch()
+
+    for i in range(n):
+        response = read_from_db(todays_date - count, key)
+        if response is not None:
+            sum = sum + response
+            count = count + 1
+
+    average = 0
+    if count > 0: 
+        average = sum / count
+    else:
+        average = sum
+
+    return average
 
 def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
@@ -110,8 +152,8 @@ def main():
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
 
-    database_name = "is-my-town-safe"
-
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
+    
     write_to_db(database_name, results)
 
     print("Total Cases:", format(results["total_cases"], ',d'))
