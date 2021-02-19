@@ -60,7 +60,10 @@ def merge_data(data1, data2):
             data1.update({ key : data2[key]})   # merge unfound keypairs in data2 into data1
     return data1
 
-
+'''
+Take in a dict-of-dicts and a key on which we are aggregating
+Returns the sum of ints within that key
+'''
 def aggregate(data, value_to_aggregate):
     running_total = 0
 
@@ -98,13 +101,14 @@ def main():
 
     results = dict()
 
-    results["date"] = str(date.today())    # add the date to the database record
+    results["date"] = str(today)    # add the date to the database record
+    results["zips"] = zip_codes_to_keep
     results["total_cases"] = aggregate(merged,"Cases")
     results["total_population"] = aggregate(merged, "Population")
     results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
-    results["positives"] = aggregate(merged,"Positives")
+    results["positive_tests"] = aggregate(merged,"Positives")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
-    results["percentage_positive_tests"] = results["positives"] / results["total_tests"]
+    results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
 
     database_name = "is-my-town-safe"
 
