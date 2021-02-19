@@ -1,9 +1,43 @@
 import urllib.request, json
-from datetime import date
+from datetime import date, datetime
+from google.cloud import firestore
+
+database_name = "is-my-town-safe"
+
+'''
+Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
+'''
+def write_to_db(data):
+    
+    document_name = str(days_since_epoch()) # the document name is the number of days since 1970-01-01
+
+    db = firestore.Client()
+    db.collection(database_name).document(document_name).set(data)    
+
+'''
+TO DO: write this up
+'''
+def read_from_db(document_name, key):
+    db = firestore.Client()
+    doc = db.collection(database_name).document(str(document_name)).get()
+    if doc.exists:
+        doc_dict = doc.to_dict()
+        return doc_dict[key]
+    else:
+        return None
+
+'''
+Returns the number of days since 1970-01-01, using the current time and local timezone
+'''
+def days_since_epoch():
+    return int(int(datetime.now().timestamp()) / 60 / 60 / 24)    # may be a better way to calculate this
 
 
+'''
+Takes a URL, which hopefully points at a JSON document
+Returns the parsed JSON that the URL returns
+'''
 def pull_data(address):
-    #print("Collecting data...")
     with urllib.request.urlopen(address) as url:
         data = json.loads(url.read().decode())
 
@@ -39,7 +73,10 @@ def merge_data(data1, data2):
             data1.update({ key : data2[key]})   # merge unfound keypairs in data2 into data1
     return data1
 
-
+'''
+Take in a dict-of-dicts and a key on which we are aggregating
+Returns the sum of ints within that key
+'''
 def aggregate(data, value_to_aggregate):
     running_total = 0
 
@@ -49,6 +86,35 @@ def aggregate(data, value_to_aggregate):
 
     return running_total
 
+'''
+Takes an int, n, which is the number of days to calculate the average
+data, a dict
+key, a string which is the corresponding key in data to average
+Returns an average of n ints. If n ints can't be found, return the average of however many ints were found up to n
+'''
+def n_day_average(n, data, key):
+    sum = 0
+    count = 0
+    
+    todays_value = data[key]
+    sum = sum + todays_value
+    count = count + 1
+
+    todays_date = days_since_epoch()
+
+    for i in range(n):
+        response = read_from_db(todays_date - i, key)
+        if response is not None:
+            sum = sum + response
+            count = count + 1
+
+    average = 0
+    if count > 0: 
+        average = sum / count
+    else:
+        average = sum
+
+    return average
 
 def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
@@ -77,16 +143,22 @@ def main():
 
     results = dict()
 
+    results["date"] = str(today)    # add the date to the database record
+    results["zips"] = zip_codes_to_keep
     results["total_cases"] = aggregate(merged,"Cases")
     results["total_population"] = aggregate(merged, "Population")
-    results["case_rate"] = results["total_cases"] / results["total_population"] * 100000
-    results["positives"] = aggregate(merged,"Positives")
+    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
+    results["positive_tests"] = aggregate(merged,"Positives")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
-    results["percentage_positive_tests"] = results["positives"] / results["total_tests"]
+    results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
+
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
+    
+    write_to_db(results)
 
     print("Total Cases:", format(results["total_cases"], ',d'))
     print("Total Population:", format(results["total_population"], ',d'))
-    print("Case Rate per 100,000:", format(results["case_rate"], ',.1f'))  # format to 1 decimal place
+    print("Case Rate per 100,000:", format(results["case_rate_per_100k"], ',.1f'))  # format to 1 decimal place
     print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
 
 main()
