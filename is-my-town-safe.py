@@ -103,7 +103,7 @@ def n_day_average(n, data, key):
     todays_date = days_since_epoch()
 
     for i in range(n):
-        response = read_from_db(todays_date - count, key)
+        response = read_from_db(todays_date - i, key)
         if response is not None:
             sum = sum + response
             count = count + 1
