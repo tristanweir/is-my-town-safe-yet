@@ -1,6 +1,6 @@
 import urllib.request, json
 from datetime import date, datetime
-# from google.cloud import firestore
+from google.cloud import firestore
 
 database_name = "is-my-town-safe"
 
@@ -148,14 +148,13 @@ def check_safety(request):
     for result in results:
         print(result,": ",results[result])
 
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")    
+    write_to_db(results)
+    
     response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
     return response
 
-'''
-    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
-    
-    write_to_db(results)
-'''
+
 
 '''
 def hello_world(request):
@@ -175,7 +174,6 @@ def hello_world(request):
     else:
         return f'Hello World!'
 '''
-
 
 '''
 def main():
