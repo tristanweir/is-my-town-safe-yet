@@ -22,7 +22,7 @@ def read_from_db(document_name, key):
     doc = db.collection(database_name).document(str(document_name)).get()
     if doc.exists:
         doc_dict = doc.to_dict()
-        return doc_dict[key]
+        return doc_dict.get(key)
     else:
         return None
 
@@ -54,7 +54,6 @@ def filter_data(data, zip_codes_to_keep):
     for entry in data:
         for zip in zip_codes_to_keep:
             if "attributes" in entry and "Zip_Number" in entry["attributes"] and entry["attributes"]["Zip_Number"] == zip:
-                #print(entry["attributes"])
                 filtered_data.update({ zip : entry["attributes"] })
 
     return filtered_data
@@ -96,9 +95,10 @@ def n_day_average(n, data, key):
     sum = 0
     count = 0
     
-    todays_value = data[key]
-    sum = sum + todays_value
-    count = count + 1
+    todays_value = data.get(key)
+    if type(todays_value) == int or type(todays_value) == float:
+        sum = sum + todays_value
+        count = count + 1
 
     todays_date = days_since_epoch()
 
@@ -116,9 +116,68 @@ def n_day_average(n, data, key):
 
     return average
 
+def check_safety(request):
+    zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
+    
+    url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
+    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests&returnGeometry=false&outSR=4326&f=json"
+
+    
+    data1 = pull_data(url1)
+    filtered_data1 = filter_data(data1["features"], zip_codes_to_keep)
+    
+    data2 = pull_data(url2)
+    filtered_data2 = filter_data(data2["features"], zip_codes_to_keep)
+    
+    
+
+    merged = merge_data(filtered_data1, filtered_data2)
+    today = date.today()    
+
+    results = dict()
+
+    results["date"] = str(today)    # add the date to the database record
+    results["zips"] = zip_codes_to_keep
+    results["total_cases"] = aggregate(merged,"Cases")
+    results["total_population"] = aggregate(merged, "Population")
+    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
+    results["positive_tests"] = aggregate(merged,"Positives")
+    results["total_tests"] = aggregate(merged,"NumberOfTests")
+    results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
+
+    for result in results:
+        print(result,": ",results[result])
+
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")    
+    write_to_db(results)
+    
+    response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
+    return response
+
+
+
+'''
+def hello_world(request):
+    """Responds to any HTTP request.
+    Args:
+        request (flask.Request): HTTP request object.
+    Returns:
+        The response text or any set of values that can be turned into a
+        Response object using
+        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
+    """
+    request_json = request.get_json()
+    if request.args and 'message' in request.args:
+        return request.args.get('message')
+    elif request_json and 'message' in request_json:
+        return request_json['message']
+    else:
+        return f'Hello World!'
+'''
+
+'''
 def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
-    # zip_codes_to_keep = [94602]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
     url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests&returnGeometry=false&outSR=4326&f=json"
@@ -137,9 +196,6 @@ def main():
     today = date.today()
     print("Live Data as of", today, "\n", merged)
     
-    # for testing, statically load the merged dataset so we are not constantly calling the API
-    # merged = {94606: {'Zip_Number': 94606, 'Population': 38169, 'Cases': 639, 'CaseRates': 1674.13345909, 'PercentagePositiveTests': 5.964795194794}, 94610: {'Zip_Number': 94610, 'Population': 30014, 'Cases': 154, 'CaseRates': 513.09388952, 'PercentagePositiveTests': 1.581609195402}, 94619: {'Zip_Number': 94619, 'Population': 25119, 'Cases': 348, 'CaseRates': 1385.40546996, 'PercentagePositiveTests': 5.819360293081}, 94601: {'Zip_Number': 94601, 'Population': 55840, 'Cases': 2035, 'CaseRates': 3644.34097421, 'PercentagePositiveTests': 15.088161209068}, 94602: {'Zip_Number': 94602, 'Population': 30831, 'Cases': 311, 'CaseRates': 1008.72498459, 'PercentagePositiveTests': 3.97580916116}}
-    # print("Statically loaded data: ", merged)
 
     results = dict()
 
@@ -162,3 +218,4 @@ def main():
     print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
 
 main()
+'''
