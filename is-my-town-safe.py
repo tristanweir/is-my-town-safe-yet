@@ -1,6 +1,6 @@
 import urllib.request, json
 from datetime import date, datetime
-from google.cloud import firestore
+# from google.cloud import firestore
 
 database_name = "is-my-town-safe"
 
@@ -145,12 +145,36 @@ def check_safety(request):
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
 
+    for result in results:
+        print(result,": ",results[result])
+
+    response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
+    return response
+
+'''
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     
     write_to_db(results)
+'''
 
-
-
+'''
+def hello_world(request):
+    """Responds to any HTTP request.
+    Args:
+        request (flask.Request): HTTP request object.
+    Returns:
+        The response text or any set of values that can be turned into a
+        Response object using
+        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
+    """
+    request_json = request.get_json()
+    if request.args and 'message' in request.args:
+        return request.args.get('message')
+    elif request_json and 'message' in request_json:
+        return request_json['message']
+    else:
+        return f'Hello World!'
+'''
 
 
 '''
