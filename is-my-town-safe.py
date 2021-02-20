@@ -22,7 +22,7 @@ def read_from_db(document_name, key):
     doc = db.collection(database_name).document(str(document_name)).get()
     if doc.exists:
         doc_dict = doc.to_dict()
-        return doc_dict[key]
+        return doc_dict.get(key)
     else:
         return None
 
@@ -95,9 +95,10 @@ def n_day_average(n, data, key):
     sum = 0
     count = 0
     
-    todays_value = data[key]
-    sum = sum + todays_value
-    count = count + 1
+    todays_value = data.get(key)
+    if type(todays_value) == int or type(todays_value) == float:
+        sum = sum + todays_value
+        count = count + 1
 
     todays_date = days_since_epoch()
 
