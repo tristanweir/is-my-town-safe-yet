@@ -204,46 +204,4 @@ def hello_world(request):
         return f'Hello World!'
 '''
 
-'''
-def main():
-    zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
-    
-    url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
-    url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests&returnGeometry=false&outSR=4326&f=json"
-
-    
-    data1 = pull_data(url1)
-    filtered_data1 = filter_data(data1["features"], zip_codes_to_keep)
-    
-    data2 = pull_data(url2)
-    filtered_data2 = filter_data(data2["features"], zip_codes_to_keep)
-    
-    
-    print(filtered_data1, "\n\n")
-    print(filtered_data2, "\n\n")
-    merged = merge_data(filtered_data1, filtered_data2)
-    today = date.today()
-    print("Live Data as of", today, "\n", merged)
-    
-
-    results = dict()
-
-    results["date"] = str(today)    # add the date to the database record
-    results["zips"] = zip_codes_to_keep
-    results["total_cases"] = aggregate(merged,"Cases")
-    results["total_population"] = aggregate(merged, "Population")
-    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
-    results["positive_tests"] = aggregate(merged,"Positives")
-    results["total_tests"] = aggregate(merged,"NumberOfTests")
-    results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
-
-    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
-    
-    write_to_db(results)
-
-    print("Total Cases:", format(results["total_cases"], ',d'))
-    print("Total Population:", format(results["total_population"], ',d'))
-    print("Case Rate per 100,000:", format(results["case_rate_per_100k"], ',.1f'))  # format to 1 decimal place
-    print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
-'''
 # main()
