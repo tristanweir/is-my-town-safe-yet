@@ -38,8 +38,27 @@ def days_since_epoch():
 
 
 def main():
+    todays_data = read_from_db(days_since_epoch())
+    body = ""
 
+    '''
+    results["date"] = today    # add the date to the database record
+    results["zips"] = zip_codes_to_keep
+    results["total_cases"] = aggregate(merged,"Cases")
+    results["total_population"] = aggregate(merged, "Population")
+    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
+    results["positive_tests"] = aggregate(merged,"Positives")
+    results["total_tests"] = aggregate(merged,"NumberOfTests")
+    results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
+    results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
+    '''
+    if todays_data is not None:
+        body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data["date"])
+        body += "<p>Total Cases: {:,}</p>\n".format(todays_data["total_cases"])
+        body += "<p>Case Rate per 100,000 population: {:,}</p>\n".format(todays_data["case_rate_per_100k"])
+        
 
-
+    print(body)    
 
 main()
