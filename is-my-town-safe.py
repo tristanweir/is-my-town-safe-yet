@@ -117,7 +117,8 @@ def n_day_average(n, data, key):
 
     return average
 
-def check_safety(request):
+#def check_safety(request):
+def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
@@ -146,10 +147,28 @@ def check_safety(request):
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
 
+
+    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
+    week_old_avg_case_rate = read_from_db(days_since_epoch()-7,"7_day_avg_case_rate")
+    
+    if week_old_avg_case_rate is not None:
+        results["7_day_change_avg_case_rate"] = results["case_rate_per_100k"] - week_old_avg_case_rate
+    else:
+        results["7_day_change_avg_case_rate"] = None
+    
+
+    results["7_day_avg_percentage_pos"] = n_day_average(7,results,"percentage_positive_tests")
+    week_old_percentage_pos = read_from_db(days_since_epoch()-7,"percentage_positive_tests")
+    
+    if week_old_percentage_pos is not None:
+        results["7_day_change_avg_percentage_pos"] = results["percentage_positive_tests"] - week_old_percentage_pos
+    else:
+        results["7_day_change_avg_percentage_pos"] = None
+
+
     for result in results:
         print(result,": ",results[result])
 
-    results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")    
     write_to_db(results)
     
     response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
@@ -217,6 +236,5 @@ def main():
     print("Total Population:", format(results["total_population"], ',d'))
     print("Case Rate per 100,000:", format(results["case_rate_per_100k"], ',.1f'))  # format to 1 decimal place
     print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
-
-main()
 '''
+main()
