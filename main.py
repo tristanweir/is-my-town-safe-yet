@@ -1,3 +1,4 @@
+# gcloud functions deploy check_safety --entry-point check_safety --trigger-http --runtime python38
 import urllib.request, json
 from datetime import date, datetime
 from google.cloud import firestore
