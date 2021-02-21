@@ -56,7 +56,7 @@ def main():
     if todays_data is not None:
         body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data["date"])
         body += "<p>Total Cases: {:,}</p>\n".format(todays_data["total_cases"])
-        body += "<p>Case Rate per 100,000 population: {:,1}</p>\n".format(todays_data["case_rate_per_100k"])
+        body += "<p>Case Rate per 100,000 population: {:,.1f}</p>\n".format(todays_data["case_rate_per_100k"])
 
 
     print(body)    
