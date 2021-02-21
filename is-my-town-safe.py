@@ -15,7 +15,8 @@ def write_to_db(data):
     db.collection(database_name).document(document_name).set(data)    
 
 '''
-TO DO: write this up
+Takes a document_name in a firestore db, a key that corresponds to a value in a firestore db
+Returns the value of the key, or None if neither the document or the key can be found
 '''
 def read_from_db(document_name, key):
     db = firestore.Client()
