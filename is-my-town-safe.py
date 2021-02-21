@@ -117,28 +117,25 @@ def n_day_average(n, data, key):
 
     return average
 
-#def check_safety(request):
-def main():
+def check_safety(request):
+# def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
     url2 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/1/query?where=1%3D1&outFields=Zip_Number,Positives,NumberOfTests&returnGeometry=false&outSR=4326&f=json"
-
     
     data1 = pull_data(url1)
     filtered_data1 = filter_data(data1["features"], zip_codes_to_keep)
     
     data2 = pull_data(url2)
     filtered_data2 = filter_data(data2["features"], zip_codes_to_keep)
-    
-    
 
     merged = merge_data(filtered_data1, filtered_data2)
-    today = date.today()    
+    today = str(date.today()    )
 
     results = dict()
 
-    results["date"] = str(today)    # add the date to the database record
+    results["date"] = today    # add the date to the database record
     results["zips"] = zip_codes_to_keep
     results["total_cases"] = aggregate(merged,"Cases")
     results["total_population"] = aggregate(merged, "Population")
@@ -146,24 +143,35 @@ def main():
     results["positive_tests"] = aggregate(merged,"Positives")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
-
-
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
+    results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
+
+     # calculate how case rate and percentage positive have changed in the past week   
     week_old_avg_case_rate = read_from_db(days_since_epoch()-7,"7_day_avg_case_rate")
-    
     if week_old_avg_case_rate is not None:
         results["7_day_change_avg_case_rate"] = results["case_rate_per_100k"] - week_old_avg_case_rate
     else:
         results["7_day_change_avg_case_rate"] = None
     
-
-    results["7_day_avg_percentage_pos"] = n_day_average(7,results,"percentage_positive_tests")
-    week_old_percentage_pos = read_from_db(days_since_epoch()-7,"percentage_positive_tests")
-    
+    week_old_percentage_pos = read_from_db(days_since_epoch()-7,"percentage_positive_tests")   
     if week_old_percentage_pos is not None:
         results["7_day_change_avg_percentage_pos"] = results["percentage_positive_tests"] - week_old_percentage_pos
     else:
         results["7_day_change_avg_percentage_pos"] = None
+    
+    # calculate how case rate and percentage positive have changed in the past month
+    month_old_avg_case_rate = read_from_db(days_since_epoch()-28,"7_day_avg_case_rate")
+    if month_old_avg_case_rate is not None:
+        results["28_day_change_avg_case_rate"] = results["case_rate_per_100k"] - month_old_avg_case_rate
+    else:
+        results["28_day_change_avg_case_rate"] = None
+    
+
+    month_old_percentage_pos = read_from_db(days_since_epoch()-28,"percentage_positive_tests")   
+    if month_old_percentage_pos is not None:
+        results["28_day_change_avg_percentage_pos"] = results["percentage_positive_tests"] - month_old_percentage_pos
+    else:
+        results["28_day_change_avg_percentage_pos"] = None
 
 
     for result in results:
@@ -237,4 +245,4 @@ def main():
     print("Case Rate per 100,000:", format(results["case_rate_per_100k"], ',.1f'))  # format to 1 decimal place
     print("Percentage of Positive Tests:", format(results["percentage_positive_tests"], ',.1%'))
 '''
-main()
+# main()
