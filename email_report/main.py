@@ -54,10 +54,27 @@ def main():
     results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
     '''
     if todays_data is not None:
-        body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data["date"])
-        body += "<p>Total Cases: {:,}</p>\n".format(todays_data["total_cases"])
-        body += "<p>Case Rate per 100,000 population: {:,.1f}</p>\n".format(todays_data["case_rate_per_100k"])
+        body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data.get("date"))
+        body += "<p>Total Cases: {:,}</p>\n".format(todays_data.get("total_cases"))
+        body += "<p>Case Rate per 100,000 population: {:,.1f}</p>\n".format(todays_data.get("case_rate_per_100k"))
+        body += "<p>Percentage of positive tests: {:.1%}</p>\n".format(todays_data.get("percentage_positive_tests"))
+        body += "\n"
+        
+        week_change_avg_case_rate = todays_data.get("7_day_change_avg_case_rate")
+        week_change_avg_percentage_pos = todays_data.get("7_day_change_avg_percentage_pos")
+        month_change_avg_case_rate = todays_data.get("28_day_change_avg_case_rate")
+        month_change_avg_percentage_pos = todays_data.get("28_day_change_avg_percentage_pos")
+        
+        body += "<p>Weekly average case rate per 100,000: {:,.1f}".format(todays_data.get("7_day_avg_case_rate"))
 
+        if week_change_avg_case_rate is not None:
+            percent_change = week_change_avg_case_rate / (todays_data.get("case_rate_per_100k") - week_change_avg_case_rate)
+            if percent_change <= 0:
+                color = "<div style=\"color:green\">"   # negative numbers mean improvement (green)
+            else:
+                color = "<div style=\"color:red\">"     # positive numbers mean worsening (red)
+            body += " {}({:+.1%} from 7 days ago)</div>".format(color, percent_change)
+        body += "</p>\n"
 
     print(body)    
 
