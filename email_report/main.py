@@ -25,6 +25,11 @@ Returns the number of days since 1970-01-01, using the current time and local ti
 def days_since_epoch():
     return int(int(datetime.now().timestamp()) / 60 / 60 / 24)    # may be a better way to calculate this
 
+'''
+Takes a value, the amount that value changed from a previous value, and the number of days we are looking at
+Returns an HTML formatted string that is the percentage change between today's value and the previous value
+HTML color is red if there is an increase (bad outcome), green if there is a decrease (good outcome)
+'''
 def calc_percentage(todays_data, amt_changed, num_days):
     snippet = ""
 
