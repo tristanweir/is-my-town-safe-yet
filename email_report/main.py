@@ -48,7 +48,7 @@ def calc_percentage(todays_data, amt_changed, num_days):
 def create_body():
     todays_data = read_from_db(days_since_epoch())
     body = ""
-
+    # TODO: Add pretty HTML template
     if todays_data is not None:
         body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data.get("date"))
         body += "<p>Total Cases: {:,}</p>\n".format(todays_data.get("total_cases"))
@@ -67,16 +67,18 @@ def create_body():
         body += "</p>\n\n"
 
         body += "<p>Data sourced from <a href=\"https://covid-19.acgov.org/data\">Alameda County Public Health Department</a></p>\n"
+        body += "To unsubscribe, talk to Tristan"
 
     return body
 
 def main():
-    body = create_body()
 
+    # TODO: Parse emails from inbound HTTP request
     from_temp = ""
     send_to = ""
     subject = "COVID-19 Report for " + str(date.today())
-    
+    body = create_body()
+
     message = Mail(
         from_email=from_temp,
         to_emails=send_to,
@@ -89,7 +91,7 @@ def main():
         print(response.body)
         print(response.headers)
     except Exception as e:
-        print(e.message)
+        print("Error: ", e)
 
     # print(body)    
 
