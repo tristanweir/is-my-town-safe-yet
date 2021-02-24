@@ -1,8 +1,10 @@
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from datetime import date, datetime
 from google.cloud import firestore
 
 database_name = "is-my-town-safe"
-
 
 '''
 Takes a document_name in a firestore db
