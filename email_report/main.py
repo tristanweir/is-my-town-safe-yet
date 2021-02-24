@@ -64,7 +64,10 @@ def create_body():
         body += "<p>7-day average percentage positive: {:.1%}".format(todays_data.get("7_day_avg_percentage_pos"))
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("7_day_change_avg_percentage_pos"),7)
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("28_day_change_avg_percentage_pos"),28)
-        body += "</p>\n"
+        body += "</p>\n\n"
+
+        body += "<p>Data sourced from <a href=\"https://covid-19.acgov.org/data\">Alameda County Public Health Department</a></p>\n"
+
     return body
 
 def main():
@@ -75,7 +78,7 @@ def main():
     subject = "COVID-19 Report for " + str(date.today())
     
     message = Mail(
-        from_email='from_email@example.com',
+        from_email=from_temp,
         to_emails=send_to,
         subject=subject,
         html_content=body)
