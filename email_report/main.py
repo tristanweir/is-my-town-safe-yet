@@ -70,6 +70,24 @@ def create_body():
 def main():
     body = create_body()
 
-    print(body)    
+    from_temp = ""
+    send_to = ""
+    subject = "COVID-19 Report for " + str(date.today())
+    
+    message = Mail(
+        from_email='from_email@example.com',
+        to_emails=send_to,
+        subject=subject,
+        html_content=body)
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e.message)
+
+    # print(body)    
 
 main()
