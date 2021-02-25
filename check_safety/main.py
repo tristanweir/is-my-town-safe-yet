@@ -6,7 +6,8 @@ from google.cloud import firestore
 database_name = "is-my-town-safe"
 
 '''
-Takes a dict and adds it to a document in a Firestore database called 'is-my-town-safe'
+Takes a dict and adds it to a document in a Firestore database
+database_name is determined by the global variable
 '''
 def write_to_db(data):
     
@@ -119,7 +120,6 @@ def n_day_average(n, data, key):
     return average
 
 def check_safety(request):
-# def main():
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
     
     url1 = "https://services5.arcgis.com/ROBnTHSNjoZ2Wm1P/arcgis/rest/services/COVID_19_Statistics/FeatureServer/0/query?where=1%3D1&outFields=Zip_Number,Population,Cases,CaseRates&returnGeometry=false&outSR=4326&f=json"
@@ -132,7 +132,7 @@ def check_safety(request):
     filtered_data2 = filter_data(data2["features"], zip_codes_to_keep)
 
     merged = merge_data(filtered_data1, filtered_data2)
-    today = str(date.today()    )
+    today = str(date.today())
 
     results = dict()
 
@@ -147,7 +147,9 @@ def check_safety(request):
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
 
-     # calculate how case rate and percentage positive have changed in the past week   
+
+     # calculate how case rate and percentage positive have changed in the past week
+     # save that result in the data
     week_old_avg_case_rate = read_from_db(days_since_epoch()-7,"7_day_avg_case_rate")
     if week_old_avg_case_rate is not None:
         results["7_day_change_avg_case_rate"] = results["case_rate_per_100k"] - week_old_avg_case_rate
@@ -160,14 +162,15 @@ def check_safety(request):
     else:
         results["7_day_change_avg_percentage_pos"] = None
     
+
     # calculate how case rate and percentage positive have changed in the past month
+    # save that result in the data
     month_old_avg_case_rate = read_from_db(days_since_epoch()-28,"7_day_avg_case_rate")
     if month_old_avg_case_rate is not None:
         results["28_day_change_avg_case_rate"] = results["case_rate_per_100k"] - month_old_avg_case_rate
     else:
         results["28_day_change_avg_case_rate"] = None
     
-
     month_old_percentage_pos = read_from_db(days_since_epoch()-28,"percentage_positive_tests")   
     if month_old_percentage_pos is not None:
         results["28_day_change_avg_percentage_pos"] = results["percentage_positive_tests"] - month_old_percentage_pos
@@ -175,33 +178,10 @@ def check_safety(request):
         results["28_day_change_avg_percentage_pos"] = None
 
 
-    for result in results:
+    for result in results:      # log what we are about to save to the db
         print(result,": ",results[result])
 
     write_to_db(results)
     
     response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
     return response
-
-
-
-'''
-def hello_world(request):
-    """Responds to any HTTP request.
-    Args:
-        request (flask.Request): HTTP request object.
-    Returns:
-        The response text or any set of values that can be turned into a
-        Response object using
-        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
-    """
-    request_json = request.get_json()
-    if request.args and 'message' in request.args:
-        return request.args.get('message')
-    elif request_json and 'message' in request_json:
-        return request_json['message']
-    else:
-        return f'Hello World!'
-'''
-
-# main()
