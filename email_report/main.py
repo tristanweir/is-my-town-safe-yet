@@ -53,22 +53,23 @@ def create_body():
 
     # TODO: Add pretty HTML template
     if todays_data is not None:
-        body += "<h2>COVID-19 data for {}</h2>\n".format(todays_data.get("date"))
-        body += "<p>Total Cases: {:,}</p>\n".format(todays_data.get("total_cases"))
-        body += "<p>Case Rate per 100,000 population: {:,.1f}</p>\n".format(todays_data.get("case_rate_per_100k"))
-        body += "<p>Percentage of positive tests: {:.1%}</p>\n".format(todays_data.get("percentage_positive_tests"))
+        body += "<h2 {0}>COVID-19 data for {1}</h2>\n".format(hstyle, todays_data.get("date"))
+        body += "<p {0}>Total Cases: {1:,}</p>\n".format(pstyle, todays_data.get("total_cases"))
+        body += "<p {0}>Case Rate per 100,000 population: {1:,.1f}</p>\n".format(pstyle, todays_data.get("case_rate_per_100k"))
+        body += "<p {0}>Percentage of positive tests: {1:.1%}</p>\n".format(pstyle, todays_data.get("percentage_positive_tests"))
         body += "\n"
 
-        body += "<p>7-day average case rate per 100,000: {:,.1f}".format(todays_data.get("7_day_avg_case_rate"))
+        body += "<p {0}>7-day average case rate per 100,000: {1:,.1f}".format(pstyle, todays_data.get("7_day_avg_case_rate"))
         body += calc_percentage(todays_data.get("7_day_avg_case_rate"),todays_data.get("7_day_change_avg_case_rate"),7)
         body += calc_percentage(todays_data.get("7_day_avg_case_rate"),todays_data.get("28_day_change_avg_case_rate"),28)
         body += "</p>\n"
 
-        body += "<p>7-day average percentage positive: {:.1%}".format(todays_data.get("7_day_avg_percentage_pos"))
+        body += "<p {0}>7-day average percentage positive: {1:.1%}".format(pstyle, todays_data.get("7_day_avg_percentage_pos"))
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("7_day_change_avg_percentage_pos"),7)
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("28_day_change_avg_percentage_pos"),28)
         body += "</p>\n\n"
 
+    body = get_pretty_email_header() + body + get_pretty_email_footer()
     return body
 
 # TODO: Convert to GCP Cloud Function
@@ -96,7 +97,7 @@ def main():
     '''
     print(body)    
 
-main()
+
 
 
 
@@ -279,3 +280,5 @@ def get_pretty_email_footer():
     </html>
     """
     return html_footer
+
+main()
