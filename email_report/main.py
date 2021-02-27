@@ -1,8 +1,10 @@
+# gcloud functions deploy email_report --entry-point email_report --trigger-http --runtime python38
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from datetime import date, datetime
 from google.cloud import firestore
+from flask import Flask, request
 
 database_name = "is-my-town-safe"
 
@@ -44,7 +46,6 @@ def calc_percentage(todays_data, amt_changed, num_days):
     return snippet
 
 
-
 def create_body():
     todays_data = read_from_db(days_since_epoch())
     body = ""
@@ -82,55 +83,6 @@ def create_body():
     body = get_pretty_email_header() + body + get_pretty_email_footer()
     return body
 
-# TODO: Convert to GCP Cloud Function
-def main():
-
-    # TODO: Parse email addresses from inbound HTTP request object
-    from_temp = ""
-    send_to = ""
-    subject = "COVID-19 Report for " + str(date.today())
-    body = create_body()
-    '''
-    message = Mail(
-        from_email=from_temp,
-        to_emails=send_to,
-        subject=subject,
-        html_content=body)
-    try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print("Error: ", e)
-    '''
-    print(body)    
-
-
-
-
-
-
-# reference for processing inbound flask requests
-'''
-def hello_world(request):
-    """Responds to any HTTP request.
-    Args:
-        request (flask.Request): HTTP request object.
-    Returns:
-        The response text or any set of values that can be turned into a
-        Response object using
-        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
-    """
-    request_json = request.get_json()
-    if request.args and 'message' in request.args:
-        return request.args.get('message')
-    elif request_json and 'message' in request_json:
-        return request_json['message']
-    else:
-        return f'Hello World!'
-'''
 
 '''
 Wrap the text we care about in a lot of inlined HTML
@@ -293,4 +245,33 @@ def get_pretty_email_footer():
     """
     return html_footer
 
-main()
+
+'''
+Responds to any HTTP request.
+    Args:
+        request (flask.Request): HTTP request object.
+'''
+def email_report(request):
+
+    # extract the fromEmail address and any toEmail addresses from the request
+    if request.args and 'fromEmail' in request.args:
+        from_temp = request.args.get('fromEmail')
+    if request.args and 'toEmails' in request.args:
+        to_temp = request.args.get('toEmails')
+
+    subject = "COVID-19 Report for " + str(date.today())
+    body = create_body()
+    
+    message = Mail(
+        from_email=from_temp,
+        to_emails=to_temp,
+        subject=subject,
+        html_content=body)
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print("SendGrid Error: ", e)
