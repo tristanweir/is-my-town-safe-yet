@@ -36,10 +36,10 @@ def calc_percentage(todays_data, amt_changed, num_days):
     if amt_changed is not None:
         percent_change = amt_changed / (todays_data - amt_changed)
         if percent_change <= 0:
-            color = "<div style=\"color:green\">"   # negative numbers mean improvement (green)
+            color = "<span style=\"color:green\">"   # negative numbers mean improvement (green)
         else:
-            color = "<div style=\"color:red\">"     # positive numbers mean worsening (red)
-        snippet += " {}({:+.1%} from {} days ago)</div>".format(color, percent_change,num_days)
+            color = "<span style=\"color:red\">"     # positive numbers mean worsening (red)
+        snippet += " {0}({1:+.1%} from {2} days ago)</span>".format(color, percent_change, num_days)
 
     return snippet
 
@@ -48,15 +48,23 @@ def calc_percentage(todays_data, amt_changed, num_days):
 def create_body():
     todays_data = read_from_db(days_since_epoch())
     body = ""
-    hstyle = "style=\"font-family: sans-serif; font-size: 20px; font-weight: normal; margin: 0; Margin-bottom: 15px;\""
+    hstyle = "style=\"font-family: sans-serif; font-size: 24px; font-weight: normal; margin: 0; Margin-bottom: 15px;\""
     pstyle = "style=\"font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;\""
 
-    # TODO: Add pretty HTML template
     if todays_data is not None:
-        body += "<h2 {0}>COVID-19 data for {1}</h2>\n".format(hstyle, todays_data.get("date"))
-        body += "<p {0}>Total Cases: {1:,}</p>\n".format(pstyle, todays_data.get("total_cases"))
-        body += "<p {0}>Case Rate per 100,000 population: {1:,.1f}</p>\n".format(pstyle, todays_data.get("case_rate_per_100k"))
-        body += "<p {0}>Percentage of positive tests: {1:.1%}</p>\n".format(pstyle, todays_data.get("percentage_positive_tests"))
+        body += "<p {0}>COVID-19 data for {1}</p>\n".format(hstyle, todays_data.get("date"))
+
+        zips = ""
+        for zip in todays_data.get("zips"):
+            zips += str(zip) + ", "
+        zips = zips[:-2]        # trim the final comma and space from the list
+
+        body += "<p {0}><span style=\"color:gray\">Zip Codes Included: [{1}]</span></p>".format(pstyle, zips)
+
+
+        body += "<p {0}>Total Cases: {1:,}<br>\n".format(pstyle, todays_data.get("total_cases"))
+        body += "Case Rate per 100,000 population: {0:,.1f}<br>\n".format(todays_data.get("case_rate_per_100k"))
+        body += "Percentage of positive tests: {0:.1%}<br></p>\n".format(todays_data.get("percentage_positive_tests"))
         body += "\n"
 
         body += "<p {0}>7-day average case rate per 100,000: {1:,.1f}".format(pstyle, todays_data.get("7_day_avg_case_rate"))
@@ -68,6 +76,8 @@ def create_body():
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("7_day_change_avg_percentage_pos"),7)
         body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("28_day_change_avg_percentage_pos"),28)
         body += "</p>\n\n"
+
+
 
     body = get_pretty_email_header() + body + get_pretty_email_footer()
     return body
@@ -122,7 +132,10 @@ def hello_world(request):
         return f'Hello World!'
 '''
 
-
+'''
+Wrap the text we care about in a lot of inlined HTML
+Sourced from: https://github.com/leemunroe/responsive-html-email-template
+'''
 def get_pretty_email_header():
     html_header = """
     <!doctype html>
@@ -130,7 +143,7 @@ def get_pretty_email_header():
     <head>
         <meta name="viewport" content="width=device-width">
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Simple Transactional Email</title>
+        <title>COVID-19 Report for Oakland</title>
         <style>
         /* -------------------------------------
             INLINED WITH htmlemail.io/inline
@@ -256,7 +269,6 @@ def get_pretty_email_footer():
                 <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                     <tr>
                     <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                        <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">Tristanweir.com</span>
                         <br> Data sourced from <a href="https://covid-19.acgov.org/data" style="text-decoration: underline; color: #999999; font-size: 12px; text-align: center;">Alameda County Public Health Department</a>
                         <br> Don't like these emails? Ask Tristan to stop sending them to you.
                     </td>
