@@ -188,6 +188,18 @@ def check_safety(request):
 
     # calculate how case rate and percentage positive have changed in the past month
     # save that result in the data
+    month_old_avg_new_cases = read_from_db(days - 28,"7_day_avg_new_cases")
+    if month_old_avg_new_cases is not None:
+        results["28_day_change_avg_new_cases"] = results["7_day_avg_new_cases"] - month_old_avg_new_cases
+    else:
+        results["28_day_change_avg_new_cases"] = None
+
+    month_old_avg_new_pos_tests = read_from_db(days - 28,"7_day_avg_percent_new_pos_tests")
+    if month_old_avg_new_pos_tests is not None:
+        results["28_day_change_percent_new_pos"] = results["7_day_avg_percent_new_pos_tests"] - month_old_avg_new_pos_tests
+    else:
+        results["28_day_change_percent_new_pos"] = None
+    
     month_old_avg_case_rate = read_from_db(days_since_epoch()-28,"7_day_avg_case_rate")
     if month_old_avg_case_rate is not None:
         results["28_day_change_avg_case_rate"] = results["case_rate_per_100k"] - month_old_avg_case_rate
