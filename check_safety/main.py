@@ -133,6 +133,7 @@ def check_safety(request):
 
     merged = merge_data(filtered_data1, filtered_data2)
     today = str(date.today())
+    days = days_since_epoch()
 
     results = dict()
 
@@ -140,27 +141,49 @@ def check_safety(request):
     results["zips"] = zip_codes_to_keep
     results["total_cases"] = aggregate(merged,"Cases")
     results["total_population"] = aggregate(merged, "Population")
-    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000
+    results["new_cases"] = results.get("total_cases") - read_from_db(days - 1, "total_cases")
+    results["case_rate_per_100k"] = results["total_cases"] / results["total_population"] * 100000   # just get this directly from the dashboard for a 28 day supply?
+    
     results["positive_tests"] = aggregate(merged,"Positives")
+    results["new_positives"] = results.get("positive_tests") - read_from_db(days - 1, "positive_tests")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
+    results["new_total_tests"] = results.get("total_tests") - read_from_db(days - 1, "total_tests")
+    results["percentage_new_positive_tests"] = results.get("new_positives") / results.get("new_total_tests")
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
+    
+    results["7_day_avg_new_cases"] = n_day_average(7, results, "new_cases")
+    results["7_day_avg_new_cases_per_100k"] = results.get("7_day_avg_new_cases") / n_day_average(7, results, "total_population") * 100000
+    results["7_day_avg_percent_new_pos_tests"] = n_day_average(7, results, "percentage_new_positive_tests")
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
 
 
      # calculate how case rate and percentage positive have changed in the past week
      # save that result in the data
-    week_old_avg_case_rate = read_from_db(days_since_epoch()-7,"7_day_avg_case_rate")
+    week_old_avg_new_cases = read_from_db(days - 7,"7_day_avg_new_cases")
+    if week_old_avg_new_cases is not None:
+        results["7_day_change_avg_new_cases"] = results["7_day_avg_new_cases"] - week_old_avg_new_cases
+    else:
+        results["7_day_change_avg_new_cases"] = None
+
+    week_old_avg_new_pos_tests = read_from_db(days - 7,"7_day_avg_percent_new_pos_tests")
+    if week_old_avg_new_pos_tests is not None:
+        results["7_day_change_percent_new_pos"] = results["7_day_avg_percent_new_pos_tests"] - week_old_avg_new_pos_tests
+    else:
+        results["7_day_change_percent_new_pos"] = None
+
+    week_old_avg_case_rate = read_from_db(days - 7,"7_day_avg_case_rate")
     if week_old_avg_case_rate is not None:
-        results["7_day_change_avg_case_rate"] = results["case_rate_per_100k"] - week_old_avg_case_rate
+        results["7_day_change_avg_case_rate"] = results["7_day_avg_case_rate"] - week_old_avg_case_rate
     else:
         results["7_day_change_avg_case_rate"] = None
     
-    week_old_percentage_pos = read_from_db(days_since_epoch()-7,"percentage_positive_tests")   
+    week_old_percentage_pos = read_from_db(days - 7,"7_day_avg_percentage_pos")   
     if week_old_percentage_pos is not None:
-        results["7_day_change_avg_percentage_pos"] = results["percentage_positive_tests"] - week_old_percentage_pos
+        results["7_day_change_avg_percentage_pos"] = results["7_day_avg_percentage_pos"] - week_old_percentage_pos
     else:
         results["7_day_change_avg_percentage_pos"] = None
+
     
 
     # calculate how case rate and percentage positive have changed in the past month
@@ -185,3 +208,5 @@ def check_safety(request):
     
     response =  "Case Rate per 100k: " + str(results["case_rate_per_100k"])
     return response
+
+# check_safety(None)
