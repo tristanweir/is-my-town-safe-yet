@@ -254,10 +254,22 @@ Responds to any HTTP request.
 def email_report(request):
 
     # extract the fromEmail address and any toEmail addresses from the request
-    if request.args and 'fromEmail' in request.args:
-        from_temp = request.args.get('fromEmail')
-    if request.args and 'toEmails' in request.args:
-        to_temp = request.args.get('toEmails')
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
+    if request_json and 'fromEmail' in request_json:
+        from_temp = request_json.get('fromEmail')
+    elif request_args and 'fromEmail' in request_args:
+        from_temp = request_args.get('fromEmail')
+    # print("From Email: {}".format(from_temp))
+
+
+    if request_json and 'toEmails' in request_json:
+        to_temp = request_json.get('toEmails')
+    elif request_args and 'toEmails' in request_args:
+        to_temp = request_args.get('toEmails')
+    # print("To Emails: {}".format(to_temp))
+
 
     subject = "COVID-19 Report for " + str(date.today())
     body = create_body()
@@ -274,4 +286,6 @@ def email_report(request):
         print(response.body)
         print(response.headers)
     except Exception as e:
-        print("SendGrid Error: ", e)
+        return "SendGrid Error: {0}".format(e)
+
+    return "200"
