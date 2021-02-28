@@ -63,22 +63,29 @@ def create_body():
         body += "<p {0}><span style=\"color:gray\">Zip Codes Included: [{1}]</span></p>".format(pstyle, zips)
 
 
-        body += "<p {0}>Total Cases: {1:,}<br>\n".format(pstyle, todays_data.get("total_cases"))
-        body += "Case Rate per 100,000 population: {0:,.1f}<br>\n".format(todays_data.get("case_rate_per_100k"))
-        body += "Percentage of positive tests: {0:.1%}<br></p>\n".format(todays_data.get("percentage_positive_tests"))
-        body += "\n"
+        body += "<p {0}>Total cumulative cases: {1:,}<br>\n".format(pstyle, todays_data.get("total_cases"))
+        body += "New cases today: {0:,}\n".format(todays_data.get("new_cases"))
+        body += "</p>\n"
 
+        body += "<p {0}>Average new cases in the last 7 days: {1:,.0f}".format(pstyle, todays_data.get("7_day_avg_new_cases"))
+        body += calc_percentage(todays_data.get("7_day_avg_new_cases"), todays_data.get("7_day_change_avg_new_cases"), 7)
+        body += calc_percentage(todays_data.get("7_day_avg_new_cases"), todays_data.get("28_day_change_avg_new_cases"), 28)
+        body += "<br>\n"
+        body += "Per 100,000: {0:,.1f}\n".format(todays_data.get("7_day_avg_new_cases_per_100k"))
+        body += "</p>\n"
+        
+        '''
         body += "<p {0}>7-day average case rate per 100,000: {1:,.1f}".format(pstyle, todays_data.get("7_day_avg_case_rate"))
         body += calc_percentage(todays_data.get("7_day_avg_case_rate"),todays_data.get("7_day_change_avg_case_rate"),7)
         body += calc_percentage(todays_data.get("7_day_avg_case_rate"),todays_data.get("28_day_change_avg_case_rate"),28)
         body += "</p>\n"
+        '''
 
-        body += "<p {0}>7-day average percentage positive: {1:.1%}".format(pstyle, todays_data.get("7_day_avg_percentage_pos"))
-        body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("7_day_change_avg_percentage_pos"),7)
-        body += calc_percentage(todays_data.get("7_day_avg_percentage_pos"),todays_data.get("28_day_change_avg_percentage_pos"),28)
+        body += "<p {0}>7-day average of new positive tests: {1:.1%}".format(pstyle, todays_data.get("7_day_avg_percent_new_pos_tests"))
+        body += calc_percentage(todays_data.get("7_day_avg_percent_new_pos_tests"),todays_data.get("7_day_change_percent_new_pos"),7)
+        body += calc_percentage(todays_data.get("7_day_avg_percent_new_pos_tests"),todays_data.get("28_day_change_percent_new_pos"),28)
         body += "</p>\n\n"
-
-
+        
 
     body = get_pretty_email_header() + body + get_pretty_email_footer()
     return body
