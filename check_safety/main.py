@@ -148,7 +148,10 @@ def check_safety(request):
     results["new_positives"] = results.get("positive_tests") - read_from_db(days - 1, "positive_tests")
     results["total_tests"] = aggregate(merged,"NumberOfTests")
     results["new_total_tests"] = results.get("total_tests") - read_from_db(days - 1, "total_tests")
-    results["percentage_new_positive_tests"] = results.get("new_positives") / results.get("new_total_tests")
+    if results.get("new_total_tests") > 0:
+        results["percentage_new_positive_tests"] = results.get("new_positives") / results.get("new_total_tests")
+    else:
+        results["percentage_new_positive_tests"] = 0
     results["percentage_positive_tests"] = results["positive_tests"] / results["total_tests"]
     
     results["7_day_avg_new_cases"] = n_day_average(7, results, "new_cases")
