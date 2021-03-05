@@ -95,22 +95,8 @@ key, a string which is the corresponding key in data to average
 Returns an average of n ints. If n ints can't be found, return the average of however many ints were found up to n
 '''
 def n_day_average(n, data, key):
-    sum = 0
-    count = 0
+    sum, count = n_day_sum(n, data, key)
     
-    todays_value = data.get(key)
-    if type(todays_value) == int or type(todays_value) == float:
-        sum = sum + todays_value
-        count = count + 1
-
-    todays_date = days_since_epoch()
-
-    for i in range(n):
-        response = read_from_db(todays_date - i, key)
-        if response is not None:
-            sum = sum + response
-            count = count + 1
-
     average = 0
     if count > 0: 
         average = sum / count
@@ -144,7 +130,7 @@ def n_day_sum(n, data, key):
             count = count + 1
 
 
-    return sum
+    return sum, count
 
 def check_safety(request):
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
