@@ -170,7 +170,7 @@ def check_safety(request):
     results["7_day_avg_new_cases"] = n_day_average(7, results, "new_cases")
     results["7_day_avg_new_cases_per_100k"] = results.get("7_day_avg_new_cases") / n_day_average(7, results, "total_population") * 100000
     # results["7_day_avg_percent_new_pos_tests"] = n_day_average(7, results, "percentage_new_positive_tests")
-    results["7_day_avg_percent_new_pos_tests"] = n_day_sum(7, results, "new_positives") / n_day_sum(7, results, "new_total_tests")
+    results["7_day_avg_percent_new_pos_tests"] = n_day_sum(7, results, "new_positives")[0] / n_day_sum(7, results, "new_total_tests")[0]
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
 
