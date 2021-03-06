@@ -95,6 +95,24 @@ key, a string which is the corresponding key in data to average
 Returns an average of n ints. If n ints can't be found, return the average of however many ints were found up to n
 '''
 def n_day_average(n, data, key):
+    sum, count = n_day_sum(n, data, key)
+    
+    average = 0
+    if count > 0: 
+        average = sum / count
+    else:
+        average = sum
+
+    return average
+
+
+'''
+Takes an number, n, which is the number of days to calculate the sum
+data, a dict
+key, a string which is the corresponding key in data to average
+Returns a sum of n numbers. If n numbers can't be found, return the sum of however many numbers were found up to n
+'''
+def n_day_sum(n, data, key):
     sum = 0
     count = 0
     
@@ -111,13 +129,8 @@ def n_day_average(n, data, key):
             sum = sum + response
             count = count + 1
 
-    average = 0
-    if count > 0: 
-        average = sum / count
-    else:
-        average = sum
 
-    return average
+    return sum, count
 
 def check_safety(request):
     zip_codes_to_keep = [94601, 94602, 94606, 94610, 94619]
@@ -156,7 +169,8 @@ def check_safety(request):
     
     results["7_day_avg_new_cases"] = n_day_average(7, results, "new_cases")
     results["7_day_avg_new_cases_per_100k"] = results.get("7_day_avg_new_cases") / n_day_average(7, results, "total_population") * 100000
-    results["7_day_avg_percent_new_pos_tests"] = n_day_average(7, results, "percentage_new_positive_tests")
+    # results["7_day_avg_percent_new_pos_tests"] = n_day_average(7, results, "percentage_new_positive_tests")
+    results["7_day_avg_percent_new_pos_tests"] = n_day_sum(7, results, "new_positives")[0] / n_day_sum(7, results, "new_total_tests")[0]
     results["7_day_avg_case_rate"] = n_day_average(7, results, "case_rate_per_100k")
     results["7_day_avg_percentage_pos"] = n_day_average(7, results, "percentage_positive_tests")
 
